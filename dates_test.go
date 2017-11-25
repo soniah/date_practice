@@ -13,6 +13,7 @@ Hint: when parsing difficult dates, you can build up the layout chunk by chunk
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -175,13 +176,19 @@ var testsFoo = []struct {
 }
 
 func TestExercises(t *testing.T) {
+
+	location, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, row := range testsFoo {
 
 		var parsedTime time.Time
 		var err error
 
 		if row.parseFunction == nil {
-			parsedTime, err = time.Parse(row.answer, row.question)
+			parsedTime, err = time.ParseInLocation(row.answer, row.question, location)
 		} else {
 			parsedTime, err = row.parseFunction(row.question)
 		}
@@ -191,7 +198,7 @@ func TestExercises(t *testing.T) {
 		}
 
 		var equal bool
-		unixTime := time.Unix(row.unixTime, 0)
+		unixTime := time.Unix(row.unixTime, 0).In(location)
 
 		if row.equalityFunction == nil {
 			equal = unixTime.Equal(parsedTime)
