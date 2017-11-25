@@ -50,7 +50,7 @@ var testsFoo = []struct {
 	{
 		"koala",
 		"Tuesday, 21 November 2017 7:28:27 PM HKT",
-		"Monday, 02 January 2006 3:04:05 PM MST", // REPLACE_EMPTY_STRING
+		"",
 		1511263707,
 		nil,
 		nil,
@@ -58,7 +58,7 @@ var testsFoo = []struct {
 	{
 		"bandicoot",
 		"Tuesday, 21 November 2017 7:28:27 PM GMT+08:00",
-		"Monday, 02 January 2006 3:04:05 PM GMT-07:00", // REPLACE_EMPTY_STRING
+		"",
 		1511263707,
 		nil,
 		nil,
@@ -66,7 +66,7 @@ var testsFoo = []struct {
 	{
 		"dingo",
 		"Fri Oct 26 11:41:59 HKT 1979",
-		"Mon Jan 02 15:04:05 MST 2006", // REPLACE_EMPTY_STRING
+		"",
 		309757319,
 		nil,
 		nil,
@@ -74,7 +74,7 @@ var testsFoo = []struct {
 	{
 		"quokka",
 		"Tue Jan 27 07:30:41 +0800 1970",
-		"Mon Jan 02 15:04:05 -0700 2006", // REPLACE_EMPTY_STRING
+		"",
 		2244641,
 		nil,
 		nil,
@@ -82,7 +82,7 @@ var testsFoo = []struct {
 	{
 		"echidna",
 		"Monday, 21-Apr-75 11:02:18 HKST",
-		"Monday, 02-Jan-06 15:04:05 MST", // REPLACE_EMPTY_STRING
+		"",
 		167277738,
 		nil,
 		nil,
@@ -90,7 +90,7 @@ var testsFoo = []struct {
 	{
 		"emu",
 		"Thu, 21 Sep 2000 05:45:12 HKT",
-		"Mon, 02 Jan 2006 15:04:05 MST", // REPLACE_EMPTY_STRING
+		"",
 		969486312,
 		nil,
 		nil,
@@ -98,7 +98,7 @@ var testsFoo = []struct {
 	{
 		"quoll",
 		"Sun, 14 Sep 1997 20:18:04 +0800",
-		"Mon, 02 Jan 2006 15:04:05 -0700", // REPLACE_EMPTY_STRING
+		"",
 		874239484,
 		nil,
 		nil,
@@ -106,7 +106,7 @@ var testsFoo = []struct {
 	{
 		"wallaby",
 		"1991-11-13T00:08:18+08:00",
-		"2006-01-02T15:04:05-07:00", // REPLACE_EMPTY_STRING
+		"",
 		689962098,
 		nil,
 		nil,
@@ -114,7 +114,7 @@ var testsFoo = []struct {
 	{
 		"kookaburra",
 		"1973-11-10T23:42:42+08:00",
-		"2006-01-02T15:04:05-07:00", // REPLACE_EMPTY_STRING
+		"",
 		121794162,
 		nil,
 		nil,
@@ -124,7 +124,7 @@ var testsFoo = []struct {
 		"Fri May  7 01:04:53 1982",
 		"",
 		389552693,
-		platypusParse, // REPLACE_NIL
+		nil,
 		nil,
 	},
 	{
@@ -133,7 +133,7 @@ var testsFoo = []struct {
 		"02 Jan 06 15:04 MST",
 		546005494,
 		nil,
-		minuteEquality, // REPLACE_NIL
+		nil,
 	},
 	{
 		"cassowary",
@@ -141,15 +141,15 @@ var testsFoo = []struct {
 		"02 Jan 06 15:04 -0700",
 		629954,
 		nil,
-		minuteEquality, // REPLACE_NIL
+		nil,
 	},
 	{
 		"numbat",
 		"2:54PM",
-		"3:04PM", // REPLACE_EMPTY_STRING
+		"",
 		28104869,
 		nil,
-		kitchenEquality, // REPLACE_NIL
+		nil,
 	},
 	// if you find the following difficult (I did), see for ideas:
 	// https://stackoverflow.com/questions/47471071/parse-dates-with-ordinal-date-fields/47475260#47475260
@@ -158,7 +158,7 @@ var testsFoo = []struct {
 		"Sunday 23rd January 2033 04:38:25 AM",
 		"",
 		1990067905,
-		parseOrdinalDate, // REPLACE_NIL
+		nil,
 		nil,
 	},
 	{
@@ -166,7 +166,7 @@ var testsFoo = []struct {
 		"Tuesday 7th November 2017 03:18:25 PM",
 		"",
 		1510067905,
-		parseOrdinalDate, // REPLACE_NIL
+		nil,
 		nil,
 	},
 }
@@ -202,100 +202,3 @@ func TestExercises(t *testing.T) {
 	}
 }
 
-// ----------- TRUNCATE
-
-func platypusParse(question string) (time.Time, error) {
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Mon Jan _2 15:04:05 2006"
-	// TODO vs parseOrdinal - why In() vs ParseInLocation()?
-	result, err := time.ParseInLocation(layout, question, location)
-	if err != nil {
-		return zero, err
-	}
-	return result, nil
-}
-
-// test equality to the minute by rounding down; can't use
-// duration.Round() as it rounds to the *nearest* minute
-func minuteEquality(unixTime, answer time.Time) bool {
-	seconds := unixTime.Second()
-	duration := time.Duration(seconds) * time.Second
-	unixTime = unixTime.Add(-duration)
-	return unixTime.Equal(answer)
-}
-
-// test equality for "kitchen times" like "3:04PM", by
-// comparing the hour and minute values of the inputs
-func kitchenEquality(unixTime, answer time.Time) bool {
-	uhours := unixTime.Hour()
-	uminutes := unixTime.Minute()
-	ahours := answer.Hour()
-	aminutes := answer.Minute()
-
-	if (uhours == ahours) && (uminutes == aminutes) {
-		return true
-	}
-	return false
-}
-
-var ordinals = map[string]string{
-	"01st": "01", "02nd": "02", "03rd": "03", "04th": "04", "05th": "05",
-	"06th": "06", "07th": "07", "08th": "08", "09th": "09", "10th": "10",
-	"11th": "11", "12th": "12", "13th": "13", "14th": "14", "15th": "15",
-	"16th": "16", "17th": "17", "18th": "18", "19th": "19", "20th": "20",
-	"21st": "21", "22nd": "22", "23rd": "23", "24th": "24", "25th": "25",
-	"26th": "26", "27th": "27", "28th": "28", "29th": "29", "30th": "30",
-	"31st": "31",
-	"1st":  "01", "2nd": "02", "3rd": "03", "4th": "04", "5th": "05",
-	"6th": "06", "7th": "07", "8th": "08", "9th": "09",
-}
-
-// convert dates with days of month like "2nd" to "02" or "15th" to "15"
-// assume days of month are delimited by spaces eg "Jan 1st 2017" not
-// "Jan1st2017" - a reasonable assumption.
-func ordinalToCardinal(ordinalDate string) (string, error) {
-	var found bool
-
-	splits := strings.Split(ordinalDate, " ")
-	if len(splits) == 0 {
-		return "", fmt.Errorf("no spaces in date %s", ordinalDate)
-	}
-
-	for i, split := range splits {
-		if cardinal, ok := ordinals[split]; ok {
-			found = true
-			splits[i] = cardinal
-			break
-		}
-	}
-
-	if !found {
-		return "", fmt.Errorf("ordinal day not found in %s", ordinalDate)
-	}
-
-	return strings.Join(splits, " "), nil
-}
-
-func parseOrdinalDate(question string) (time.Time, error) {
-	cardinalQuestion, err := ordinalToCardinal(question)
-	if err != nil {
-		return zero, err
-	}
-
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Monday 02 January 2006 15:04:05 PM"
-	result, err := time.Parse(layout, cardinalQuestion)
-	if err != nil {
-		return zero, err
-	}
-	// TODO vs platypus - why In() vs ParseInLocation()?
-	return result.In(location), nil
-}
