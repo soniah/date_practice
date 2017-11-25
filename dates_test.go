@@ -13,6 +13,7 @@ Hint: when parsing difficult dates, you can build up the layout chunk by chunk
 
 import (
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 	"time"
@@ -38,7 +39,7 @@ var testsFoo = []struct {
 
 	// some questions can't be parsed using only a layout string; for
 	// these write a parsing function
-	parseFunction func(string) (time.Time, error)
+	parseFunction func(string, string, *time.Location) (time.Time, error)
 
 	// some questions can't be parsed exactly; for these write an equality
 	// function to test if unixTime is "equal" to your answer
@@ -125,9 +126,9 @@ var testsFoo = []struct {
 	{
 		"platypus",
 		"Fri May  7 01:04:53 1982",
-		"",
+		"Mon Jan _2 15:04:05 2006", // REPLACE_EMPTY_STRING
 		389552693,
-		platypusParse, // REPLACE_NIL
+		nil,
 		nil,
 	},
 	{
@@ -159,7 +160,7 @@ var testsFoo = []struct {
 	{
 		"wombat",
 		"Sunday 23rd January 2033 04:38:25 AM",
-		"",
+		"Monday 02 January 2006 15:04:05 PM",
 		1990067905,
 		parseOrdinalDate, // REPLACE_NIL
 		nil,
@@ -167,7 +168,7 @@ var testsFoo = []struct {
 	{
 		"kangaroo",
 		"Tuesday 7th November 2017 03:18:25 PM",
-		"",
+		"Monday 02 January 2006 15:04:05 PM",
 		1510067905,
 		parseOrdinalDate, // REPLACE_NIL
 		nil,
@@ -175,15 +176,21 @@ var testsFoo = []struct {
 }
 
 func TestExercises(t *testing.T) {
+
+	location, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for _, row := range testsFoo {
 
 		var parsedTime time.Time
 		var err error
 
 		if row.parseFunction == nil {
-			parsedTime, err = time.Parse(row.answer, row.question)
+			parsedTime, err = time.ParseInLocation(row.answer, row.question, location)
 		} else {
-			parsedTime, err = row.parseFunction(row.question)
+			parsedTime, err = row.parseFunction(row.answer, row.question, location)
 		}
 
 		if err != nil {
@@ -191,7 +198,7 @@ func TestExercises(t *testing.T) {
 		}
 
 		var equal bool
-		unixTime := time.Unix(row.unixTime, 0)
+		unixTime := time.Unix(row.unixTime, 0).In(location)
 
 		if row.equalityFunction == nil {
 			equal = unixTime.Equal(parsedTime)
@@ -206,21 +213,6 @@ func TestExercises(t *testing.T) {
 }
 
 // ----------- TRUNCATE
-
-func platypusParse(question string) (time.Time, error) {
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Mon Jan _2 15:04:05 2006"
-	// TODO vs parseOrdinal - why In() vs ParseInLocation()?
-	result, err := time.ParseInLocation(layout, question, location)
-	if err != nil {
-		return zero, err
-	}
-	return result, nil
-}
 
 // test equality to the minute by rounding down; can't use
 // duration.Round() as it rounds to the *nearest* minute
@@ -283,18 +275,12 @@ func ordinalToCardinal(ordinalDate string) (string, error) {
 	return strings.Join(splits, " "), nil
 }
 
-func parseOrdinalDate(question string) (time.Time, error) {
+func parseOrdinalDate(layout, question string, location *time.Location) (time.Time, error) {
 	cardinalQuestion, err := ordinalToCardinal(question)
 	if err != nil {
 		return zero, err
 	}
 
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Monday 02 January 2006 15:04:05 PM"
 	result, err := time.Parse(layout, cardinalQuestion)
 	if err != nil {
 		return zero, err
