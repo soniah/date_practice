@@ -1,8 +1,8 @@
 # Date Practice
 
-Parsing dates is often the programmer's equivalent of cleaning your bathroom or
-doing your tax return - it needs doing but you want it finished quickly and
-painlessly.
+Parsing dates is the programmer's equivalent of doing your taxes - it needs
+doing, it's fidly and easy to get wrong, and you want it done quickly and
+with as little pain as possible.
 
 Previously I'd read [package time](https://golang.org/pkg/time), got confused
 by the **reference time layouti** `Mon Jan 2 15:04:05 MST 2006` and fought my
@@ -32,9 +32,7 @@ dates but you wouldn't learn much. Instead write your own layouts.
 
 My answers are in the branch `answers` but no peeking!
 
-Where the dates don't have timezones they in are in Hong Kong time. I was on a
-contract in HK and have fond memories of programming in restaurants while
-eating _Shrimp Dumplings_, _Ice Lemon Tea_ and _Portuguese Tarts_ :-)
+Where the dates don't have timezones they in are in Hong Kong time.
 
 ## Useful Links
 
