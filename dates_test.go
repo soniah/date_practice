@@ -50,9 +50,12 @@ var testsFoo = []struct {
 	{
 		"koala",
 		"Tuesday, 21 November 2017 7:28:27 PM HKT",
+		// YOU write the following
 		"",
 		1511263707,
+		// YOU might also need to write the following
 		nil,
+		// YOU might also need to write the following
 		nil,
 	},
 	{
