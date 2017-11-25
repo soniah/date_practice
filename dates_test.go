@@ -126,9 +126,9 @@ var testsFoo = []struct {
 	{
 		"platypus",
 		"Fri May  7 01:04:53 1982",
-		"",
+		"Mon Jan _2 15:04:05 2006", // REPLACE_EMPTY_STRING
 		389552693,
-		platypusParse, // REPLACE_NIL
+		nil,
 		nil,
 	},
 	{
@@ -213,21 +213,6 @@ func TestExercises(t *testing.T) {
 }
 
 // ----------- TRUNCATE
-
-func platypusParse(question string) (time.Time, error) {
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Mon Jan _2 15:04:05 2006"
-	// TODO vs parseOrdinal - why In() vs ParseInLocation()?
-	result, err := time.ParseInLocation(layout, question, location)
-	if err != nil {
-		return zero, err
-	}
-	return result, nil
-}
 
 // test equality to the minute by rounding down; can't use
 // duration.Round() as it rounds to the *nearest* minute
