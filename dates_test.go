@@ -130,7 +130,7 @@ var testsFoo = []struct {
 	{
 		"bilby",
 		"21 Apr 87 20:11 HKT",
-		"02 Jan 06 15:04 MST",
+		"02 Jan 06 15:04 MST", // REPLACE_EMPTY_STRING
 		546005494,
 		nil,
 		minuteEquality, // REPLACE_NIL
@@ -138,7 +138,7 @@ var testsFoo = []struct {
 	{
 		"cassowary",
 		"08 Jan 70 14:59 +0800",
-		"02 Jan 06 15:04 -0700",
+		"02 Jan 06 15:04 -0700", // REPLACE_EMPTY_STRING
 		629954,
 		nil,
 		minuteEquality, // REPLACE_NIL
@@ -177,10 +177,10 @@ func TestExercises(t *testing.T) {
 		var parsedTime time.Time
 		var err error
 
-		if row.parseFunction != nil {
-			parsedTime, err = row.parseFunction(row.question)
-		} else {
+		if row.parseFunction == nil {
 			parsedTime, err = time.Parse(row.answer, row.question)
+		} else {
+			parsedTime, err = row.parseFunction(row.question)
 		}
 
 		if err != nil {
