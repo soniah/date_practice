@@ -39,7 +39,7 @@ var testsFoo = []struct {
 
 	// some questions can't be parsed using only a layout string; for
 	// these write a parsing function
-	parseFunction func(string) (time.Time, error)
+	parseFunction func(string, string, *time.Location) (time.Time, error)
 
 	// some questions can't be parsed exactly; for these write an equality
 	// function to test if unixTime is "equal" to your answer
@@ -160,7 +160,7 @@ var testsFoo = []struct {
 	{
 		"wombat",
 		"Sunday 23rd January 2033 04:38:25 AM",
-		"",
+		"Monday 02 January 2006 15:04:05 PM",
 		1990067905,
 		parseOrdinalDate, // REPLACE_NIL
 		nil,
@@ -168,7 +168,7 @@ var testsFoo = []struct {
 	{
 		"kangaroo",
 		"Tuesday 7th November 2017 03:18:25 PM",
-		"",
+		"Monday 02 January 2006 15:04:05 PM",
 		1510067905,
 		parseOrdinalDate, // REPLACE_NIL
 		nil,
@@ -190,7 +190,7 @@ func TestExercises(t *testing.T) {
 		if row.parseFunction == nil {
 			parsedTime, err = time.ParseInLocation(row.answer, row.question, location)
 		} else {
-			parsedTime, err = row.parseFunction(row.question)
+			parsedTime, err = row.parseFunction(row.answer, row.question, location)
 		}
 
 		if err != nil {
@@ -275,18 +275,12 @@ func ordinalToCardinal(ordinalDate string) (string, error) {
 	return strings.Join(splits, " "), nil
 }
 
-func parseOrdinalDate(question string) (time.Time, error) {
+func parseOrdinalDate(layout, question string, location *time.Location) (time.Time, error) {
 	cardinalQuestion, err := ordinalToCardinal(question)
 	if err != nil {
 		return zero, err
 	}
 
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return zero, err
-	}
-
-	layout := "Monday 02 January 2006 15:04:05 PM"
 	result, err := time.Parse(layout, cardinalQuestion)
 	if err != nil {
 		return zero, err
