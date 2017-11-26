@@ -28,8 +28,10 @@ var testsFoo = []struct {
 	// timezone are Hong Kong times
 	question string
 
-	// your "answer" - the layout string to be used by time.Parse();
-	// ignored if parseFunction is not nil
+	// your "answer" - the layout string to be used by time.Parse().
+	// If you have a parseFunction() "answer" will be ignored by the tests,
+	// but it *will* be passed into the parseFunction() where you _might_
+	// want to use it
 	answer string
 
 	// the unixTime value of the "question", used by the tests to check
@@ -37,43 +39,39 @@ var testsFoo = []struct {
 	unixTime int64
 
 	// some questions can't be parsed using only a layout string; for
-	// these write a parsing function
-	parseFunction func(string) (time.Time, error)
+	// these write a parsing function. Your "answer" will be passed, in
+	// case you want to use it in your parseFunction()
+	parseFunction func(answer string, question string) (time.Time, error)
 
 	// some questions can't be parsed exactly; for these write an equality
-	// function to test if unixTime is "equal" to your answer
+	// function to test if unixTime is "equal" to your answer (after it
+	// has been converted to time.Time).
+	equalityFunction func(unixTime, timeAnswer time.Time) bool
+
+	// In summary, you might need to write some/all of the following
+	// to solve some  questions:
 	//
-	// you may only need to write parseFunction, only equalityFunction, or
-	// both functions
-	equalityFunction func(unixTime, answer time.Time) bool
+	// * answer
+	// * parseFunction
+	// * equalityFunction
 }{
-	{
-		"koala",
-		"Tuesday, 21 November 2017 7:28:27 PM HKT",
-		// YOU write the following
-		"",
-		1511263707,
-		// YOU might also need to write the following
-		nil,
-		// YOU might also need to write the following
-		nil,
-	},
+
 	{
 		"bandicoot",
 		"Tuesday, 21 November 2017 7:28:27 PM GMT+08:00",
+
+		// YOU might need to write the following
 		"",
+
 		1511263707,
+
+		// YOU might need to write the following
 		nil,
-		nil,
-	},
-	{
-		"dingo",
-		"Fri Oct 26 11:41:59 HKT 1979",
-		"",
-		309757319,
-		nil,
+
+		// YOU might need to write the following
 		nil,
 	},
+
 	{
 		"quokka",
 		"Tue Jan 27 07:30:41 +0800 1970",
@@ -82,30 +80,16 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
 	{
-		"echidna",
-		"Monday, 21-Apr-75 11:02:18 HKST",
+		"koala",
+		"Tuesday, 21 November 2017 7:28:27 PM HKT",
 		"",
-		167277738,
+		1511263707,
 		nil,
 		nil,
 	},
-	{
-		"emu",
-		"Thu, 21 Sep 2000 05:45:12 HKT",
-		"",
-		969486312,
-		nil,
-		nil,
-	},
-	{
-		"quoll",
-		"Sun, 14 Sep 1997 20:18:04 +0800",
-		"",
-		874239484,
-		nil,
-		nil,
-	},
+
 	{
 		"wallaby",
 		"1991-11-13T00:08:18+08:00",
@@ -114,6 +98,25 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
+	{
+		"dingo",
+		"Fri Oct 26 11:41:59 HKT 1979",
+		"",
+		309757319,
+		nil,
+		nil,
+	},
+
+	{
+		"echidna",
+		"Monday, 21-Apr-75 11:02:18 HKST",
+		"",
+		167277738,
+		nil,
+		nil,
+	},
+
 	{
 		"kookaburra",
 		"1973-11-10T23:42:42+08:00",
@@ -122,6 +125,25 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
+	{
+		"emu",
+		"Thu, 21 Sep 2000 05:45:12 HKT",
+		"",
+		969486312,
+		nil,
+		nil,
+	},
+
+	{
+		"quoll",
+		"Sun, 14 Sep 1997 20:18:04 +0800",
+		"",
+		874239484,
+		nil,
+		nil,
+	},
+
 	{
 		"platypus",
 		"Fri May  7 01:04:53 1982",
@@ -130,6 +152,7 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
 	{
 		"bilby",
 		"21 Apr 87 20:11 HKT",
@@ -138,6 +161,7 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
 	{
 		"cassowary",
 		"08 Jan 70 14:59 +0800",
@@ -146,6 +170,8 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
+	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
 	{
 		"numbat",
 		"2:54PM",
@@ -154,6 +180,7 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
 	// if you find the following difficult (I did), see for ideas:
 	// https://stackoverflow.com/questions/47471071/parse-dates-with-ordinal-date-fields/47475260#47475260
 	{
@@ -164,6 +191,7 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+
 	{
 		"kangaroo",
 		"Tuesday 7th November 2017 03:18:25 PM",
@@ -172,6 +200,7 @@ var testsFoo = []struct {
 		nil,
 		nil,
 	},
+	*/
 }
 
 func TestExercises(t *testing.T) {
@@ -183,7 +212,7 @@ func TestExercises(t *testing.T) {
 		if row.parseFunction == nil {
 			parsedTime, err = time.Parse(row.answer, row.question)
 		} else {
-			parsedTime, err = row.parseFunction(row.question)
+			parsedTime, err = row.parseFunction(row.answer, row.question)
 		}
 
 		if err != nil {
