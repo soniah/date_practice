@@ -17,47 +17,37 @@ var testsFoo = []struct {
 	// timezone are Hong Kong times
 	question string
 
-	// your "answer" - the layout string to be used by time.Parse().
-	// If you have a parseFunction() "answer" will be ignored by the tests,
-	// but it *will* be passed into the parseFunction() where you _might_
-	// want to use it
+	// your "answer" - the layout string used by time.Parse().
+	// If you have a parseFuncion "answer" will instead be passed
+	// into that function
 	answer string
 
 	// the unixTime value of the "question", used by the tests to check
 	// "question" and "answer" equality
 	unixTime int64
 
-	// some questions can't be parsed using only a layout string; for
-	// these write a parsing function. Your "answer" will be passed, in
-	// case you want to use it in your parseFunction()
+	// some questions can't be parsed only using a layout string; for
+	// these write a parsing function
 	parseFunction func(answer string, question string) (time.Time, error)
 
-	// some questions can't be parsed exactly; for these write an equality
-	// function to test if unixTime is "equal" to your answer (after it
-	// has been converted to time.Time).
-	equalityFunction func(unixTime, timeAnswer time.Time) bool
-
-	// In summary, you might need to write some/all of the following
-	// to solve some  questions:
-	//
-	// * answer
-	// * parseFunction
-	// * equalityFunction
+	// some questions can't be parsed exactly; for these write a function
+	// to test equality
+	equalityFunction func(unixTime, answerTime time.Time) bool
 }{
 
 	{
 		"bandicoot",
 		"Tuesday, 21 November 2017 7:28:27 PM GMT+08:00",
 
-		// YOU might need to write the following
+		// YOU need to write the following
 		"Monday, 02 January 2006 3:04:05 PM GMT-07:00", // REPLACE_EMPTY_STRING
 
 		1511263707,
 
-		// YOU might need to write the following
+		// YOU _might_ need to write the following
 		nil,
 
-		// YOU might need to write the following
+		// YOU _might_ need to write the following
 		nil,
 	},
 
@@ -136,7 +126,7 @@ var testsFoo = []struct {
 	{
 		"platypus",
 		"Fri May  7 01:04:53 1982",
-		"Mon Jan _2 15:04:05 2006", // REPLACE_EMPTY_STRING
+		"Mon Jan 2 15:04:05 2006", // REPLACE_EMPTY_STRING
 		389552693,
 		hktParse, // REPLACE_NIL
 		nil,
@@ -165,32 +155,29 @@ var testsFoo = []struct {
 		"2:54PM",
 		"3:04PM", // REPLACE_EMPTY_STRING
 		28104869,
-		hktParse,
+		hktParse,        // REPLACE_NIL
 		kitchenEquality, // REPLACE_NIL
 	},
 
-	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
-
-	// if you find the following difficult (I did), see for ideas:
+	// if you find the following difficult (I did) see:
 	// https://stackoverflow.com/questions/47471071/parse-dates-with-ordinal-date-fields/47475260#47475260
 	{
 		"wombat",
 		"Sunday 23rd January 2033 04:38:25 AM",
-		"", // REPLACE_EMPTY_STRING ?
-		1990067905,
-		parseOrdinalDate, // REPLACE_NIL
+		"Monday 02 January 2006 15:04:05 PM", // REPLACE_EMPTY_STRING
+		1990039105,
+		ordinalParse, // REPLACE_NIL
 		nil,
 	},
 
 	{
 		"kangaroo",
 		"Tuesday 7th November 2017 03:18:25 PM",
-		"", // REPLACE_EMPTY_STRING ?
-		1510067905,
-		parseOrdinalDate, // REPLACE_NIL
+		"Monday 02 January 2006 15:04:05 PM", // REPLACE_EMPTY_STRING
+		1510039105,
+		ordinalParse, // REPLACE_NIL
 		nil,
 	},
-	*/
 }
 
 func TestExercises(t *testing.T) {
@@ -269,6 +256,16 @@ func kitchenEquality(unixTime, answer time.Time) bool {
 	return false
 }
 
+func ordinalParse(answer string, ordinalQuestion string) (time.Time, error) {
+	cardinalQuestion, err := ordinalToCardinal(ordinalQuestion)
+	if err != nil {
+		return epoch, err
+	}
+	return hktParse(answer, cardinalQuestion)
+}
+
+// -----------
+
 var ordinals = map[string]string{
 	"01st": "01", "02nd": "02", "03rd": "03", "04th": "04", "05th": "05",
 	"06th": "06", "07th": "07", "08th": "08", "09th": "09", "10th": "10",
@@ -305,24 +302,4 @@ func ordinalToCardinal(ordinalDate string) (string, error) {
 	}
 
 	return strings.Join(splits, " "), nil
-}
-
-func parseOrdinalDate(question string, answer string) (time.Time, error) {
-	cardinalQuestion, err := ordinalToCardinal(question)
-	if err != nil {
-		return epoch, err
-	}
-
-	location, err := time.LoadLocation("Asia/Hong_Kong")
-	if err != nil {
-		return epoch, err
-	}
-
-	layout := "Monday 02 January 2006 15:04:05 PM"
-	result, err := time.Parse(layout, cardinalQuestion)
-	if err != nil {
-		return epoch, err
-	}
-	// TODO vs platypus - why In() vs ParseInLocation()?
-	return result.In(location), nil
 }
