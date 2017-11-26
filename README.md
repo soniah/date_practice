@@ -17,6 +17,12 @@ Like many "small" projects it got larger than expected and I ended up rushing
 to finish it, so it's a bit rough around the edges. I'm also interested in some
 more questions - pull requests welcome for both.
 
+# Contributors
+
+Thanks to the following contributors:
+
+* @oylenshpeegul Tim Heaney, who came back with fixes hours after release
+
 # Instructions
 
 ```
