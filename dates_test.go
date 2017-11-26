@@ -40,7 +40,11 @@ var testsFoo = []struct {
 		"Tuesday, 21 November 2017 7:28:27 PM GMT+08:00",
 
 		// YOU need to write the following
+<<<<<<< HEAD
 		"",
+=======
+		"Monday, 02 January 2006 3:04:05 PM GMT-07:00", // REPLACE_EMPTY_STRING
+>>>>>>> answers
 
 		1511263707,
 
@@ -126,7 +130,11 @@ var testsFoo = []struct {
 	{
 		"platypus",
 		"Fri May  7 01:04:53 1982",
+<<<<<<< HEAD
 		"",
+=======
+		"Mon Jan 2 15:04:05 2006", // REPLACE_EMPTY_STRING
+>>>>>>> answers
 		389552693,
 		nil,
 		nil,
@@ -155,8 +163,13 @@ var testsFoo = []struct {
 		"2:54PM",
 		"",
 		28104869,
+<<<<<<< HEAD
 		nil,
 		nil,
+=======
+		hktParse,        // REPLACE_NIL
+		kitchenEquality, // REPLACE_NIL
+>>>>>>> answers
 	},
 
 	// if you find the following difficult (I did) see:
@@ -164,18 +177,30 @@ var testsFoo = []struct {
 	{
 		"wombat",
 		"Sunday 23rd January 2033 04:38:25 AM",
+<<<<<<< HEAD
 		"",
 		1990039105,
 		nil,
+=======
+		"Monday 02 January 2006 15:04:05 PM", // REPLACE_EMPTY_STRING
+		1990039105,
+		ordinalParse, // REPLACE_NIL
+>>>>>>> answers
 		nil,
 	},
 
 	{
 		"kangaroo",
 		"Tuesday 7th November 2017 03:18:25 PM",
+<<<<<<< HEAD
 		"",
 		1510039105,
 		nil,
+=======
+		"Monday 02 January 2006 15:04:05 PM", // REPLACE_EMPTY_STRING
+		1510039105,
+		ordinalParse, // REPLACE_NIL
+>>>>>>> answers
 		nil,
 	},
 }
@@ -211,3 +236,98 @@ func TestExercises(t *testing.T) {
 	}
 }
 
+<<<<<<< HEAD
+=======
+// ----------- TRUNCATE
+
+func hktParse(answer string, question string) (time.Time, error) {
+	location, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		return epoch, err
+	}
+
+	result, err := time.ParseInLocation(answer, question, location)
+	if err != nil {
+		return epoch, err
+	}
+	return result, nil
+}
+
+// test equality to the minute by rounding down; can't use
+// duration.Round() as it rounds to the *nearest* minute
+func minuteEquality(unixTime, answer time.Time) bool {
+	seconds := unixTime.Second()
+	duration := time.Duration(seconds) * time.Second
+	unixTime = unixTime.Add(-duration)
+	return unixTime.Equal(answer)
+}
+
+// test equality for "kitchen times" like "3:04PM", by
+// comparing the hour and minute values of the inputs
+func kitchenEquality(unixTime, answer time.Time) bool {
+
+	// hktParse returns "0000-01-01 14:54:00 +0736 LMT"
+	// "Local Mean Time" for Hong Kong -> hours and minutes are correct
+
+	// find hour/minute for unixTime in HK
+	location, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		return false
+	}
+	hkHours := unixTime.In(location).Hour()
+	hkMinutes := unixTime.In(location).Minute()
+
+	if (hkHours == answer.Hour()) && (hkMinutes == answer.Minute()) {
+		return true
+	}
+	return false
+}
+
+func ordinalParse(answer string, ordinalQuestion string) (time.Time, error) {
+	cardinalQuestion, err := ordinalToCardinal(ordinalQuestion)
+	if err != nil {
+		return epoch, err
+	}
+	return hktParse(answer, cardinalQuestion)
+}
+
+// -----------
+
+var ordinals = map[string]string{
+	"01st": "01", "02nd": "02", "03rd": "03", "04th": "04", "05th": "05",
+	"06th": "06", "07th": "07", "08th": "08", "09th": "09", "10th": "10",
+	"11th": "11", "12th": "12", "13th": "13", "14th": "14", "15th": "15",
+	"16th": "16", "17th": "17", "18th": "18", "19th": "19", "20th": "20",
+	"21st": "21", "22nd": "22", "23rd": "23", "24th": "24", "25th": "25",
+	"26th": "26", "27th": "27", "28th": "28", "29th": "29", "30th": "30",
+	"31st": "31",
+	"1st":  "01", "2nd": "02", "3rd": "03", "4th": "04", "5th": "05",
+	"6th": "06", "7th": "07", "8th": "08", "9th": "09",
+}
+
+// convert dates with days of month like "2nd" to "02" or "15th" to "15"
+// assume days of month are delimited by spaces eg "Jan 1st 2017" not
+// "Jan1st2017" - a reasonable assumption.
+func ordinalToCardinal(ordinalDate string) (string, error) {
+	var found bool
+
+	splits := strings.Split(ordinalDate, " ")
+	if len(splits) == 0 {
+		return "", fmt.Errorf("no spaces in date %s", ordinalDate)
+	}
+
+	for i, split := range splits {
+		if cardinal, ok := ordinals[split]; ok {
+			found = true
+			splits[i] = cardinal
+			break
+		}
+	}
+
+	if !found {
+		return "", fmt.Errorf("ordinal day not found in %s", ordinalDate)
+	}
+
+	return strings.Join(splits, " "), nil
+}
+>>>>>>> answers
