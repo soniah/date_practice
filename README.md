@@ -1,8 +1,7 @@
 # Date Practice
 
 Parsing dates is the programmer's equivalent of doing your taxes - you've got
-to do it, it's fidly and easy to get wrong, and you want it done quickly and
-with as little pain as possible.
+to do it, it's fidly and easy to get wrong, and you want it quick and painless.
 
 Previously I'd read [package time](https://golang.org/pkg/time), got confused
 by the **reference time layout** `Mon Jan 2 15:04:05 MST 2006` and fought my
@@ -11,11 +10,8 @@ way through various StackOverflow Questions. Or used
 
 Hence I wrote these exercises for myself, and I now find Golang's date parsing
 very logical and easy (excepting some corner cases). Hopefully the exercises
-will be of use to others.
-
-Like many "small" projects it got larger than expected and I ended up rushing
-to finish it, so it's a bit rough around the edges. I'm also interested in some
-more questions - pull requests welcome for both.
+will be of use to others. I'm interested in more questions - pull requests
+welcome.
 
 # Contributors
 
@@ -42,8 +38,9 @@ Where the dates don't have timezones they in are in Hong Kong time.
 
 # Hints
 
-* when parsing difficult dates you can build up the layout chunk by
-chunk - time.Parse() will print out the remaining unmatched text
+* when parsing difficult dates you can build up the layout chunk-by-chunk -
+  time.Parse() will print out the remaining unmatched text
+
 * `Mon Jan 2 15:04:05 MST 2006` and `01/02 03:04:05PM '06 -0700`
 
 ## Useful Links
