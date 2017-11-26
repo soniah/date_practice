@@ -1,16 +1,5 @@
 package main
 
-/*
-Fill in the questions and run 'go test'.
-
-https://golang.org/src/time/format.go
-
-Mon Jan 2 15:04:05 MST 2006    01/02 03:04:05PM '06 -0700
-
-Hint: when parsing difficult dates, you can build up the layout chunk by chunk
-- time.Parse() will print out the remaining unmatched text.
-*/
-
 import (
 	"fmt"
 	"strings"
@@ -18,7 +7,7 @@ import (
 	"time"
 )
 
-var zero time.Time
+var epoch time.Time
 
 var testsFoo = []struct {
 	// an Australian animal name, to help navigate test output
@@ -171,15 +160,16 @@ var testsFoo = []struct {
 		nil,
 	},
 
-	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
 	{
 		"numbat",
 		"2:54PM",
 		"",
 		28104869,
-		nil,
+		hktParse,
 		nil,
 	},
+
+	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
 
 	// if you find the following difficult (I did), see for ideas:
 	// https://stackoverflow.com/questions/47471071/parse-dates-with-ordinal-date-fields/47475260#47475260
