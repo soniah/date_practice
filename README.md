@@ -1,11 +1,11 @@
 # Date Practice
 
-Parsing dates is the programmer's equivalent of doing your taxes - it needs
-doing, it's fidly and easy to get wrong, and you want it done quickly and
+Parsing dates is the programmer's equivalent of doing your taxes - you've got
+to do it, it's fidly and easy to get wrong, and you want it done quickly and
 with as little pain as possible.
 
 Previously I'd read [package time](https://golang.org/pkg/time), got confused
-by the **reference time layouti** `Mon Jan 2 15:04:05 MST 2006` and fought my
+by the **reference time layout** `Mon Jan 2 15:04:05 MST 2006` and fought my
 way through various StackOverflow Questions. Or used
 [imetakeule/fmtdate](https://github.com/metakeule/fmtdate).
 
