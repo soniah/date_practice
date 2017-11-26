@@ -1,16 +1,5 @@
 package main
 
-/*
-Fill in the questions and run 'go test'.
-
-https://golang.org/src/time/format.go
-
-Mon Jan 2 15:04:05 MST 2006    01/02 03:04:05PM '06 -0700
-
-Hint: when parsing difficult dates, you can build up the layout chunk by chunk
-- time.Parse() will print out the remaining unmatched text.
-*/
-
 import (
 	"fmt"
 	"strings"
@@ -18,7 +7,7 @@ import (
 	"time"
 )
 
-var zero time.Time
+var epoch time.Time
 
 var testsFoo = []struct {
 	// an Australian animal name, to help navigate test output
@@ -171,15 +160,16 @@ var testsFoo = []struct {
 		minuteEquality, // REPLACE_NIL
 	},
 
-	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
 	{
 		"numbat",
 		"2:54PM",
 		"3:04PM", // REPLACE_EMPTY_STRING
 		28104869,
-		nil,
+		hktParse,
 		kitchenEquality, // REPLACE_NIL
 	},
+
+	/* TODO FIX. Out of action for a couple of hours while I have lunch :-)
 
 	// if you find the following difficult (I did), see for ideas:
 	// https://stackoverflow.com/questions/47471071/parse-dates-with-ordinal-date-fields/47475260#47475260
@@ -239,13 +229,12 @@ func TestExercises(t *testing.T) {
 func hktParse(answer string, question string) (time.Time, error) {
 	location, err := time.LoadLocation("Asia/Hong_Kong")
 	if err != nil {
-		return zero, err
+		return epoch, err
 	}
 
-	// TODO vs parseOrdinal - why In() vs ParseInLocation()?
 	result, err := time.ParseInLocation(answer, question, location)
 	if err != nil {
-		return zero, err
+		return epoch, err
 	}
 	return result, nil
 }
@@ -262,12 +251,19 @@ func minuteEquality(unixTime, answer time.Time) bool {
 // test equality for "kitchen times" like "3:04PM", by
 // comparing the hour and minute values of the inputs
 func kitchenEquality(unixTime, answer time.Time) bool {
-	uhours := unixTime.Hour()
-	uminutes := unixTime.Minute()
-	ahours := answer.Hour()
-	aminutes := answer.Minute()
 
-	if (uhours == ahours) && (uminutes == aminutes) {
+	// hktParse returns "0000-01-01 14:54:00 +0736 LMT"
+	// "Local Mean Time" for Hong Kong -> hours and minutes are correct
+
+	// find hour/minute for unixTime in HK
+	location, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		return false
+	}
+	hkHours := unixTime.In(location).Hour()
+	hkMinutes := unixTime.In(location).Minute()
+
+	if (hkHours == answer.Hour()) && (hkMinutes == answer.Minute()) {
 		return true
 	}
 	return false
@@ -314,18 +310,18 @@ func ordinalToCardinal(ordinalDate string) (string, error) {
 func parseOrdinalDate(question string, answer string) (time.Time, error) {
 	cardinalQuestion, err := ordinalToCardinal(question)
 	if err != nil {
-		return zero, err
+		return epoch, err
 	}
 
 	location, err := time.LoadLocation("Asia/Hong_Kong")
 	if err != nil {
-		return zero, err
+		return epoch, err
 	}
 
 	layout := "Monday 02 January 2006 15:04:05 PM"
 	result, err := time.Parse(layout, cardinalQuestion)
 	if err != nil {
-		return zero, err
+		return epoch, err
 	}
 	// TODO vs platypus - why In() vs ParseInLocation()?
 	return result.In(location), nil

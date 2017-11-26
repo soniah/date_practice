@@ -40,6 +40,12 @@ My answers are in the branch `answers` but no peeking!
 
 Where the dates don't have timezones they in are in Hong Kong time.
 
+# Hints
+
+* when parsing difficult dates you can build up the layout chunk by
+chunk - time.Parse() will print out the remaining unmatched text
+* `Mon Jan 2 15:04:05 MST 2006` and `01/02 03:04:05PM '06 -0700`
+
 ## Useful Links
 
 * [Martynas - Formatting date and time in Golang](https://medium.com/@Martynas/formatting-date-and-time-in-golang-5816112bf098)
